@@ -21,7 +21,7 @@ const TeamPage = () => {
       id: 2,
       name: 'Prateek Kv',
       role: 'Co-Organizer',
-      image: 'https://media.licdn.com/dms/image/v2/D5603AQHLzSrmhSc7Cw/profile-displayphoto-shrink_800_800/B56ZQo7stMG8Ac-/0/1735853526389?e=1764806400&v=beta&t=z1RfcaZrScSvYjJ08vLJCtYaYboYajOpOAz95UbcDgE',
+      image: '/assets/Prateek.jpg',
       bio: 'Operationally focused co-organizer who ensures plans translate into flawless on-the-ground execution and strong partner coordination.',
       responsibilities: ['Logistics planning & execution', 'Cross-team coordination', 'Vendor & partner management'],
       contact: {
