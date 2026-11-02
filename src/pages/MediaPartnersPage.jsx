@@ -104,8 +104,6 @@ const MediaPartnersPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <Header />
-      
       <main id="main-content" className="pt-24 md:pt-28 lg:pt-32">
         {/* Hero Section */}
         <section className="py-20 relative overflow-hidden">
@@ -327,7 +325,7 @@ const MediaPartnersPage = () => {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <motion.a
-                  href="mailto:media@tedxIIMT UNIVERSITY.com"
+                  href="mailto:tedxiimtuniversity@gmail.com?subject=Media%20Inquiry"
                   className="bg-[#EB0028] hover:bg-[#ff1a3d] text-white px-8 py-4 text-lg font-semibold transition-all duration-300 inline-flex items-center justify-center"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
@@ -336,7 +334,7 @@ const MediaPartnersPage = () => {
                 </motion.a>
                 
                 <motion.a
-                  href="/media-kit"
+                  href="mailto:tedxiimtuniversity@gmail.com?subject=Request%20Media%20Kit"
                   className="bg-gray-800 hover:bg-gray-700 text-white px-8 py-4 text-lg font-semibold border border-[#1a1a1a] hover:border-[#EB0028]/50 transition-all duration-300 inline-flex items-center justify-center"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
@@ -348,8 +346,6 @@ const MediaPartnersPage = () => {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 };

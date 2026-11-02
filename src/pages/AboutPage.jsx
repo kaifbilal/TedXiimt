@@ -6,8 +6,6 @@ import Footer from '../components/Footer';
 const AboutPage = () => {
   return (
     <div className="min-h-screen bg-black text-white">
-      <Header />
-      
       <main id="main-content" className="pt-24 md:pt-28 lg:pt-32">
         {/* Hero Section */}
         <section className="relative overflow-hidden">
@@ -27,9 +25,10 @@ const AboutPage = () => {
                 
                 <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
                   About{' '}
+                  <br />
                   <span className="text-[#EB0028] inline-block">
-                    TEDxIIMT UNIVERSITY
-                  </span>
+                    TEDx
+                  </span>IIMT UNIVERSITY
                 </h1>
                 
                 <p className="text-lg sm:text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto leading-relaxed px-4">
@@ -93,17 +92,6 @@ const AboutPage = () => {
                         talks, we create moments of insight that resonate long after the 
                         curtain closes.
                       </p>
-                    </div>
-                    
-                    <div className="grid sm:grid-cols-2 gap-6 md:gap-8 pt-6">
-                      <div className="space-y-3">
-                        <div className="text-4xl md:text-5xl font-bold text-[#EB0028]">500+</div>
-                        <p className="text-gray-400">Attendees Expected</p>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="text-4xl md:text-5xl font-bold text-[#EB0028]">12+</div>
-                        <p className="text-gray-400">Inspiring Speakers</p>
-                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -484,8 +472,6 @@ const AboutPage = () => {
         </div> 
       
       </main>
-
-      <Footer />
     </div>
   );
 };

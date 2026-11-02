@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Handshake, Globe, TrendingUp, FileText, Calendar, Users, Lightbulb, Mail } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -202,8 +203,6 @@ const CommunityPartnersPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
-      <Header />
-      
       <main id="main-content" className="pt-20">
         {/* Hero Section */}
         <section className="py-20 relative overflow-hidden">
@@ -346,7 +345,7 @@ const CommunityPartnersPage = () => {
                 whileHover={{ y: -5 }}
               >
                 <div className="bg-red-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-2xl">🤝</span>
+                  <Handshake className="w-8 h-8 text-red-500" />
                 </div>
                 <h3 className="text-2xl font-bold mb-4">Collaborative Impact</h3>
                 <p className="text-gray-300">
@@ -363,7 +362,7 @@ const CommunityPartnersPage = () => {
                 whileHover={{ y: -5 }}
               >
                 <div className="bg-red-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-2xl">🌐</span>
+                  <Globe className="w-8 h-8 text-red-500" />
                 </div>
                 <h3 className="text-2xl font-bold mb-4">Extended Network</h3>
                 <p className="text-gray-300">
@@ -380,7 +379,7 @@ const CommunityPartnersPage = () => {
                 whileHover={{ y: -5 }}
               >
                 <div className="bg-red-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-2xl">📈</span>
+                  <TrendingUp className="w-8 h-8 text-red-500" />
                 </div>
                 <h3 className="text-2xl font-bold mb-4">Amplified Reach</h3>
                 <p className="text-gray-300">
@@ -412,38 +411,43 @@ const CommunityPartnersPage = () => {
                 {
                   type: "Content Collaboration",
                   description: "Co-create content and share expertise",
-                  icon: "📝"
+                  Icon: FileText
                 },
                 {
                   type: "Event Partnership",
                   description: "Joint events and speaker exchanges",
-                  icon: "🎪"
+                  Icon: Calendar
                 },
                 {
                   type: "Community Building",
                   description: "Build stronger communities together",
-                  icon: "👥"
+                  Icon: Users
                 },
                 {
                   type: "Innovation Projects",
                   description: "Collaborative innovation initiatives",
-                  icon: "💡"
+                  Icon: Lightbulb
                 }
-              ].map((opportunity, index) => (
-                <motion.div
-                  key={opportunity.type}
-                  className="bg-gray-800/50 rounded-xl p-6 text-center border border-gray-700/50 hover:border-red-500/50 transition-all duration-300"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  whileHover={{ y: -5, scale: 1.02 }}
-                >
-                  <div className="text-4xl mb-4">{opportunity.icon}</div>
-                  <h3 className="text-lg font-bold mb-3">{opportunity.type}</h3>
-                  <p className="text-gray-400 text-sm">{opportunity.description}</p>
-                </motion.div>
-              ))}
+              ].map((opportunity, index) => {
+                const OppIcon = opportunity.Icon;
+                return (
+                  <motion.div
+                    key={opportunity.type}
+                    className="bg-gray-800/50 rounded-xl p-6 text-center border border-gray-700/50 hover:border-red-500/50 transition-all duration-300"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    whileHover={{ y: -5, scale: 1.02 }}
+                  >
+                    <div className="p-3 bg-gray-700/40 rounded-xl w-14 h-14 mx-auto mb-4 flex items-center justify-center text-red-500">
+                      <OppIcon className="w-8 h-8" />
+                    </div>
+                    <h3 className="text-lg font-bold mb-3">{opportunity.type}</h3>
+                    <p className="text-gray-400 text-sm">{opportunity.description}</p>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -464,31 +468,29 @@ const CommunityPartnersPage = () => {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <motion.a
-                  href="mailto:partnerships@tedxIIMT UNIVERSITY.com"
+                  href="/join-us/sponsor"
                   className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 inline-flex items-center justify-center space-x-2"
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <span>🤝</span>
+                  <Handshake className="w-5 h-5" />
                   <span>Partner With Us</span>
                 </motion.a>
                 
                 <motion.a
-                  href="/partnership-deck"
+                  href="mailto:tedxiimtuniversity@gmail.com?subject=Community%20Partnership%20Inquiry"
                   className="bg-gray-800 hover:bg-gray-700 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 inline-flex items-center justify-center space-x-2"
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <span>📊</span>
-                  <span>Partnership Deck</span>
+                  <Mail className="w-5 h-5" />
+                  <span>Email Partnerships</span>
                 </motion.a>
               </div>
             </motion.div>
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 };

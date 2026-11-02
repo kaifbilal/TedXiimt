@@ -1,252 +1,237 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import { Calendar, Clock, Mic, Coffee, Music, Video, Radio, Sparkles, Layers, Sliders, Shield, User } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 const SchedulePage = () => {
-  const scheduleItems = [
-    {
-      time: "8:00 AM",
-      title: "Registration & Welcome Coffee",
-      description: "Check-in, networking, and light refreshments",
-      type: "logistics"
-    },
-    {
-      time: "9:00 AM",
-      title: "Opening Ceremony",
-      description: "Welcome address and event overview",
-      type: "ceremony"
-    },
-    {
-      time: "9:30 AM",
-      title: "Keynote: The Future of Innovation",
-      speaker: "Dr. Sarah Johnson",
-      description: "Exploring breakthrough technologies and their impact on society",
-      type: "talk"
-    },
-    {
-      time: "10:00 AM",
-      title: "Talk: Sustainable Tomorrow",
-      speaker: "Michael Chen",
-      description: "Environmental solutions for the next generation",
-      type: "talk"
-    },
-    {
-      time: "10:30 AM",
-      title: "Coffee Break & Networking",
-      description: "Connect with speakers and fellow attendees",
-      type: "break"
-    },
-    {
-      time: "11:00 AM",
-      title: "Talk: Digital Transformation",
-      speaker: "Priya Sharma",
-      description: "How technology is reshaping business landscapes",
-      type: "talk"
-    },
-    {
-      time: "11:30 AM",
-      title: "Performance: Musical Interlude",
-      speaker: "Local Artists",
-      description: "Inspiring musical performance",
-      type: "performance"
-    },
-    {
-      time: "12:00 PM",
-      title: "Talk: Education Revolution",
-      speaker: "Prof. Rajesh Kumar",
-      description: "Reimagining learning for the digital age",
-      type: "talk"
-    },
-    {
-      time: "12:30 PM",
-      title: "Mystery Speaker",
-      speaker: "Special Guest",
-      description: "A surprise presentation that will inspire and amaze",
-      type: "mystery"
-    },
-    {
-      time: "1:00 PM",
-      title: "Networking Lunch",
-      description: "Gourmet lunch with structured networking activities",
-      type: "break"
-    },
-    {
-      time: "2:30 PM",
-      title: "Panel Discussion: Future Leaders",
-      speaker: "Multiple Speakers",
-      description: "Interactive discussion on leadership in the modern world",
-      type: "panel"
-    },
-    {
-      time: "3:30 PM",
-      title: "Talk: Creative Innovation",
-      speaker: "Artist TBA",
-      description: "The intersection of art and technology",
-      type: "talk"
-    },
-    {
-      time: "4:00 PM",
-      title: "Final Networking & Closing",
-      description: "Wrap-up, key takeaways, and continued connections",
-      type: "logistics"
-    }
-  ];
+  const { user, isVolunteer, isLead, isAdmin } = useAuth();
+  const [viewMode, setViewMode] = useState('public'); // 'public' | 'backstage'
+  const [publicSessions, setPublicSessions] = useState([]);
+  const [backstageCues, setBackstageCues] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const getTypeColor = (type) => {
-    switch (type) {
-      case 'talk': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      case 'panel': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
-      case 'performance': return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'mystery': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-      case 'break': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-      case 'ceremony': return 'bg-pink-500/20 text-pink-400 border-pink-500/30';
-      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-    }
-  };
+  useEffect(() => {
+    let isMounted = true;
+    const fetchScheduleData = async () => {
+      try {
+        const [publicData, backstageData] = await Promise.all([
+          api.get('/api/schedule/cues/public_schedule/', { year: 2025 }).catch(() => []),
+          api.get('/api/schedule/cues/backstage_ros/', { year: 2025 }).catch(() => [])
+        ]);
+
+        if (isMounted) {
+          const publicList = Array.isArray(publicData) ? publicData : (publicData?.results || []);
+          const backstageList = Array.isArray(backstageData) ? backstageData : (backstageData?.results || []);
+
+          // Group public cues by block
+          if (publicList.length > 0) {
+            const blocksMap = {};
+            publicList.forEach(cue => {
+              const bTitle = cue.block_title || 'Session';
+              if (!blocksMap[bTitle]) {
+                blocksMap[bTitle] = {
+                  session: `Block ${cue.block_sequence || 1} • ${cue.start_time || '09:00 AM'} - ${cue.end_time || '11:00 AM'}`,
+                  title: bTitle,
+                  desc: cue.block_desc || 'Keynote talks, discussions, and live performances.',
+                  cues: []
+                };
+              }
+              blocksMap[bTitle].cues.push({
+                time: cue.start_time || '09:00 AM',
+                title: cue.title,
+                type: cue.item_type || 'talk',
+                speaker: cue.speaker_name || cue.description || 'TEDx Speaker',
+                duration: cue.duration_minutes ? `${cue.duration_minutes} min` : null
+              });
+            });
+            setPublicSessions(Object.values(blocksMap));
+          }
+
+          // Backstage Cues
+          if (backstageList.length > 0) {
+            const mappedRos = backstageList.map((cue, idx) => ({
+              seq: String(cue.sequence_order || idx + 1).padStart(2, '0'),
+              time: cue.start_time || '09:00 AM',
+              cue: cue.title,
+              type: cue.item_type,
+              mic: cue.mic_channel ? `Mic ${cue.mic_channel} (${cue.mic_type || 'Wireless'})` : '—',
+              light: cue.lighting_preset || 'House 100%',
+              av: cue.av_screen_notes || cue.video_clip_name || 'Slide Deck / Cam live feed',
+              crew: cue.assigned_crew_names?.join(', ') || 'AV & Stage Crew'
+            }));
+            setBackstageCues(mappedRos);
+          }
+        }
+      } catch (err) {
+        console.warn('Schedule API error:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchScheduleData();
+    return () => { isMounted = false; };
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
-      <Header />
-      
-      <main id="main-content" className="pt-20">
-        {/* Hero Section */}
-        <section className="py-20 relative overflow-hidden">
-          <div className="container mx-auto px-4 sm:px-6 relative z-10">
-            <motion.div
-              className="text-center mb-16"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6">
-                Event <span className="text-red-500">Schedule</span>
-              </h1>
-              <p className="text-xl sm:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-                A full day of inspiring talks, networking, and transformative experiences
-              </p>
-            </motion.div>
+    <div className="min-h-screen bg-black text-white pt-28 pb-20 px-4 sm:px-6 lg:px-8" id="main-content">
+      <div className="max-w-7xl mx-auto space-y-8">
+        
+        {/* Page Header */}
+        <div className="text-center max-w-3xl mx-auto mb-8">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EB0028]/10 border border-[#EB0028]/30 text-[#EB0028] text-xs font-bold uppercase mb-4">
+            <Calendar className="w-3.5 h-3.5" />
+            November 11, 2025 • Seminar Hall 2nd Fl, B Block
           </div>
-        </section>
+          <h1 className="text-4xl sm:text-5xl font-black text-white">
+            Event Schedule & <span className="text-[#EB0028]">Run of Show</span>
+          </h1>
+          <p className="text-sm text-zinc-400 mt-2">
+            Dynamic minute-by-minute timeline for TEDxIIMT University 2025: "Break the Flow".
+          </p>
+        </div>
 
-        {/* Schedule Timeline */}
-        <section className="py-20">
-          <div className="container mx-auto px-4 sm:px-6">
-            <div className="max-w-4xl mx-auto">
-              {scheduleItems.map((item, index) => (
-                <motion.div
-                  key={index}
-                  className="relative flex items-start mb-8 last:mb-0"
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                >
-                  {/* Timeline Line */}
-                  <div className="absolute left-16 top-8 w-0.5 h-full bg-gray-700 -z-10" />
-                  
-                  {/* Time */}
-                  <div className="flex-shrink-0 w-32 text-right pr-8">
-                    <div className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium inline-block">
-                      {item.time}
-                    </div>
+        {/* View Switcher Tabs */}
+        <div className="flex justify-center">
+          <div className="inline-flex p-1.5 bg-zinc-900 border border-zinc-800 rounded-2xl">
+            <button
+              onClick={() => setViewMode('public')}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                viewMode === 'public'
+                  ? 'bg-[#EB0028] text-white shadow-lg shadow-[#EB0028]/25'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <Calendar className="w-4 h-4" />
+              Public Delegate Agenda
+            </button>
+
+            <button
+              onClick={() => setViewMode('backstage')}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                viewMode === 'backstage'
+                  ? 'bg-[#EB0028] text-white shadow-lg shadow-[#EB0028]/25'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <Sliders className="w-4 h-4" />
+              Backstage Technical Cue Sheet (ROS)
+            </button>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="py-20 text-center text-zinc-500">
+            <div className="w-8 h-8 border-2 border-[#EB0028] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-sm">Loading Live Schedule & Cue Sheets...</p>
+          </div>
+        ) : (
+          <>
+            {/* Tab 1: Public Delegate Agenda */}
+            {viewMode === 'public' && (
+              <div className="max-w-4xl mx-auto space-y-8">
+                {publicSessions.length === 0 ? (
+                  <div className="p-12 text-center text-zinc-500 bg-zinc-950 border border-zinc-800 rounded-3xl">
+                    <p>No public sessions scheduled for this edition yet.</p>
                   </div>
-                  
-                  {/* Timeline Dot */}
-                  <div className="flex-shrink-0 w-4 h-4 bg-red-500 rounded-full mt-2 relative z-10" />
-                  
-                  {/* Content */}
-                  <div className="flex-1 ml-8">
-                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700/50 hover:border-red-500/30 transition-colors">
-                      <div className="flex items-start justify-between mb-3">
-                        <h3 className="text-xl font-bold">{item.title}</h3>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getTypeColor(item.type)}`}>
-                          {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
-                        </span>
+                ) : (
+                  publicSessions.map((session, sIdx) => (
+                    <motion.div
+                      key={sIdx}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: sIdx * 0.1 }}
+                      className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 sm:p-8 space-y-6"
+                    >
+                      <div className="border-b border-zinc-800 pb-4">
+                        <div className="text-xs font-mono font-bold text-[#EB0028] uppercase tracking-wider">{session.session}</div>
+                        <h3 className="text-2xl font-black text-white mt-1">{session.title}</h3>
+                        <p className="text-xs text-zinc-400 mt-1">{session.desc}</p>
                       </div>
-                      
-                      {item.speaker && (
-                        <p className="text-red-400 font-medium mb-2">
-                          Speaker: {item.speaker}
-                        </p>
-                      )}
-                      
-                      <p className="text-gray-300 leading-relaxed">
-                        {item.description}
-                      </p>
-                    </div>
+
+                      <div className="space-y-4">
+                        {session.cues.map((cue, cIdx) => (
+                          <div
+                            key={cIdx}
+                            className="p-4 bg-zinc-900/60 border border-zinc-800/80 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                          >
+                            <div className="flex items-start sm:items-center gap-3">
+                              <span className="font-mono font-bold text-zinc-400 bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-800">
+                                {cue.time}
+                              </span>
+                              <div>
+                                <div className="font-bold text-white text-sm">{cue.title}</div>
+                                <div className="text-zinc-400 text-xs mt-0.5">{cue.speaker}</div>
+                              </div>
+                            </div>
+
+                            {cue.duration && (
+                              <span className="px-2.5 py-1 bg-zinc-900 text-zinc-400 rounded-lg text-[11px] font-mono border border-zinc-800 self-start sm:self-auto">
+                                {cue.duration}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* Tab 2: Backstage Run-of-Show Technical Cue Sheet */}
+            {viewMode === 'backstage' && (
+              <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                      <Sliders className="w-5 h-5 text-[#EB0028]" />
+                      Live Show Caller & Technical Cue Matrix
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-1">
+                      Derived from Rundown-TEDxSanDiego cue standard: Audio channels 1-7, lighting presets & camera assignments.
+                    </p>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
+                  <span className="px-3 py-1 bg-zinc-900 border border-zinc-800 text-xs font-mono text-emerald-400 font-bold rounded-lg self-start">
+                    Live Status: Synchronized
+                  </span>
+                </div>
 
-        {/* Important Info */}
-        <section className="py-20 bg-gray-800/30">
-          <div className="container mx-auto px-4 sm:px-6">
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  title: "Duration",
-                  content: "Full day event\n8:00 AM - 4:00 PM",
-                  icon: "⏰"
-                },
-                {
-                  title: "Breaks",
-                  content: "Multiple networking breaks\nLunch included",
-                  icon: "☕"
-                },
-                {
-                  title: "Interactive",
-                  content: "Q&A sessions\nNetworking opportunities",
-                  icon: "🤝"
-                }
-              ].map((info, index) => (
-                <motion.div
-                  key={info.title}
-                  className="text-center bg-gray-800/50 rounded-xl p-6"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                >
-                  <div className="text-4xl mb-4">{info.icon}</div>
-                  <h3 className="text-xl font-bold mb-3">{info.title}</h3>
-                  <p className="text-gray-300 whitespace-pre-line">{info.content}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs text-zinc-300 min-w-[900px]">
+                    <thead className="bg-zinc-900 text-zinc-400 uppercase font-bold text-[10px] border-b border-zinc-800">
+                      <tr>
+                        <th className="p-3">Seq</th>
+                        <th className="p-3">Time</th>
+                        <th className="p-3">Cue Title & Description</th>
+                        <th className="p-3">Mic Channel</th>
+                        <th className="p-3">Lighting Preset</th>
+                        <th className="p-3">AV & Screen Notes</th>
+                        <th className="p-3">Crew Lead</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-900 font-mono text-[11px]">
+                      {backstageCues.map((row, idx) => (
+                        <tr key={idx} className="hover:bg-zinc-900/50 transition-colors">
+                          <td className="p-3 font-bold text-[#EB0028]">{row.seq}</td>
+                          <td className="p-3 font-bold text-white whitespace-nowrap">{row.time}</td>
+                          <td className="p-3 font-sans font-bold text-white">{row.cue}</td>
+                          <td className="p-3 text-emerald-400">{row.mic}</td>
+                          <td className="p-3 text-amber-400">{row.light}</td>
+                          <td className="p-3 font-sans text-zinc-400">{row.av}</td>
+                          <td className="p-3 font-sans text-zinc-300 font-semibold">{row.crew}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
+        )}
 
-        {/* CTA Section */}
-        <section className="py-20">
-          <div className="container mx-auto px-4 sm:px-6 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
-              <h2 className="text-4xl font-bold mb-6">Ready to Join Us?</h2>
-              <p className="text-xl text-gray-300 mb-8">
-                Don't miss this incredible day of inspiration and connection
-              </p>
-              <motion.a
-                href="/join-us/attendee"
-                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 inline-block"
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Get Your Tickets Now
-              </motion.a>
-            </motion.div>
-          </div>
-        </section>
-      </main>
-
-      <Footer />
+      </div>
     </div>
   );
 };

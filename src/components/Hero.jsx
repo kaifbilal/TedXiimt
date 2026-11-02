@@ -1,15 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import {motion, useReducedMotion } from 'framer-motion';
+import api from '../services/api';
 
 const Hero = () => {
   const prefersReducedMotion = useReducedMotion();
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0 });
+  const [editionData, setEditionData] = useState({
+    theme: 'Break the Flow',
+    date: '2025-11-11T09:00:00',
+    attendee_capacity: 350,
+    speaker_count: 10
+  });
 
-  // Event date - Update this to your actual event date
-  const eventDate = new Date('2024-12-15T10:00:00');
-
-  // Countdown timer
   useEffect(() => {
+    let isMounted = true;
+    const fetchActiveEdition = async () => {
+      try {
+        const data = await api.get('/api/editions/events/active/');
+        if (isMounted && data) {
+          setEditionData({
+            theme: data.theme || 'Break the Flow',
+            date: data.date ? `${data.date}T09:00:00` : '2025-11-11T09:00:00',
+            attendee_capacity: data.attendee_capacity || 350,
+            speaker_count: data.speaker_count || (Array.isArray(data.speakers) ? data.speakers.length : 10)
+          });
+        }
+      } catch (err) {
+        console.warn('Active edition fetch error:', err);
+      }
+    };
+
+    fetchActiveEdition();
+    return () => { isMounted = false; };
+  }, []);
+
+  // Event date countdown timer
+  useEffect(() => {
+    const eventDate = new Date(editionData.date);
     const updateCountdown = () => {
       const now = new Date();
       const difference = eventDate - now;
@@ -20,14 +47,15 @@ const Hero = () => {
           hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
           minutes: Math.floor((difference / 1000 / 60) % 60)
         });
+      } else {
+        setCountdown({ days: 0, hours: 0, minutes: 0 });
       }
     };
 
     updateCountdown();
-    const timer = setInterval(updateCountdown, 60000); // Update every minute
-
+    const timer = setInterval(updateCountdown, 60000);
     return () => clearInterval(timer);
-  }, []);
+  }, [editionData.date]);
 
   // Animation variants optimized for performance
   const containerVariants = {
@@ -49,95 +77,83 @@ const Hero = () => {
       transition: {
         type: 'spring',
         stiffness: 100,
-        damping: 15
+        damping: 20
       }
     }
   };
 
-  const fadeInVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { duration: 1.2, ease: 'easeOut' }
-    }
-  };
+  // const fadeInVariants = {
+  //   hidden: { opacity: 0 },
+  //   visible: {
+  //     opacity: 1,
+  //     transition: { duration: 0.8 }
+  //   }
+  // };
 
   return (
     <section 
-      className="relative w-full min-h-screen bg-black text-white overflow-hidden"
-      style={{ 
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-      }}
-      aria-label="Hero section"
+      className="relative min-h-[90vh] md:min-h-screen flex items-center justify-center overflow-hidden bg-[#242424] text-white"
+      aria-label="Hero Section"
     >
-      {/* Mobile-Responsive Background with Architectural Silhouette */}
-      <div className="absolute inset-0 bg-black overflow-hidden">
-        {/* Background Image Layer - Full mobile responsiveness */}
-        <img 
-          src="/transparent-hero-bg.PNG" 
-          alt=""
-          className="absolute inset-0 
-                     w-full h-full
-                     object-cover object-center
-                     xs:scale-110 xs:object-[center_30%]
-                     sm:scale-105 sm:object-[center_40%]
-                     md:scale-100 md:object-center
-                     lg:scale-100 lg:object-center
-                     transition-all duration-700 ease-out
-                     will-change-transform"
-          style={{
-            minWidth: '100%',
-            minHeight: '100%',
-            maxWidth: 'none'
-          }}
-          aria-hidden="true"
-          onError={(e) => {
-            console.error('Hero background image failed to load:', e);
-            e.target.style.display = 'none';
-          }}
-          onLoad={(e) => {
-            console.log('✅ Hero background image loaded successfully');
-            console.log('Image dimensions:', e.target.naturalWidth, 'x', e.target.naturalHeight);
-            console.log('Viewport:', window.innerWidth, 'x', window.innerHeight);
-          }}
-        />
-        
-        {/* Responsive Gradient Overlay - Adjusts for different screen sizes */}
-        <div className="absolute inset-0 bg-gradient-to-b 
-                        from-black/50 via-black/40 to-black/60
-                        sm:from-black/45 sm:via-black/35 sm:to-black/55
-                        md:from-black/40 md:via-black/30 md:to-black/50
-                        lg:from-black/35 lg:via-black/25 lg:to-black/45" />
-        
-        {/* Additional responsive gradient for depth */}
-        <div className="absolute inset-0 bg-gradient-to-t 
-                        from-[#EB0028]/15 via-transparent to-transparent
-                        md:from-[#EB0028]/10 md:via-transparent md:to-transparent" />
-        
-        {/* Subtle animated overlay - respects reduced motion */}
-        {!prefersReducedMotion && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0.05, 0.15, 0.05] }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute inset-0 bg-gradient-to-t from-[#EB0028]/10 via-transparent to-transparent"
-          />
-        )}
-      </div>
+{/* Background Image */}
 
-      {/* Main Content Container */}
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-screen py-20">
-        
+<div
+  className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+  style={{
+    backgroundImage: "url('/transparent-hero-bg.PNG')",
+    opacity: 1,
+    filter: "brightness(1) contrast(1) saturate(1)",
+  }}
+  aria-hidden="true"
+/>
+
+{/* Very Light Bottom Gradient — For Text Readability */}
+<div
+  className="absolute inset-0 z-10 pointer-events-none"
+  style={{
+    background:
+      "linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.05) 55%, rgba(0,0,0,0.4) 100%)",
+  }}
+  aria-hidden="true"
+/>
+{/* Subtle Red Accent */}
+<motion.div
+  className="absolute inset-0 z-10 pointer-events-none"
+  style={{
+    background:
+      "radial-gradient(circle at 50% 50%, rgba(235, 0, 40, 0.12), transparent 65%)",
+  }}
+  animate={
+    prefersReducedMotion
+      ? {}
+      : { opacity: [0.2, 0.6, 0.2] }
+  }
+  transition={{
+    duration: 8,
+    repeat: Infinity,
+    ease: "easeInOut",
+  }}
+  aria-hidden="true"
+/>
+
+{/* Subtle Grid Pattern */}
+<div
+  className="absolute inset-0 z-10 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none"
+  aria-hidden="true"
+/>
+
+      {/* Content Container */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20 pt-20 pb-16 md:py-24">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="text-center max-w-5xl"
+          className="max-w-5xl mx-auto text-center"
         >
-          {/* Event Badge */}
-          <motion.div
+          {/* Eyebrow - Event Type */}
+          <motion.div 
             variants={itemVariants}
-            className="inline-flex items-center gap-2 mb-6 md:mb-8"
+            className="inline-flex items-center gap-2 mb-4 md:mb-6"
           >
             <div className="h-px w-8 bg-[#EB0028]" aria-hidden="true"></div>
             <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-gray-400">
@@ -168,7 +184,7 @@ const Hero = () => {
             variants={itemVariants}
             className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-3xl mx-auto mb-8 md:mb-10 leading-relaxed font-light"
           >
-            <span className="text-white font-semibold">Ideas Worth Spreading.</span>
+            <span className="text-white font-semibold">Theme: {editionData.theme}.</span>
             <br className="hidden sm:block" />
             <span className="block mt-2">
               Experience transformative talks, connect with innovators, and discover perspectives that challenge convention.
@@ -189,7 +205,7 @@ const Hero = () => {
                   { value: countdown.days, label: 'Days' },
                   { value: countdown.hours, label: 'Hours' },
                   { value: countdown.minutes, label: 'Minutes' }
-                ].map((item, index) => (
+                ].map((item) => (
                   <div 
                     key={item.label}
                     className="bg-[#0a0a0a] border-2 border-[#1a1a1a] px-4 py-3 md:px-6 md:py-4 min-w-[70px] md:min-w-[90px]"
@@ -206,14 +222,14 @@ const Hero = () => {
             </motion.div>
           )}
 
-          {/* Call-to-Action Buttons - Enhanced Conversion */}
+          {/* Call-to-Action Buttons
           <motion.div
             variants={itemVariants}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8 md:mb-12"
           >
             <a
-              href="https://forms.gle/uwZAyzv84SB1WMo37"
-              className="group relative w-full sm:w-auto bg-[#EB0028] hover:bg-[#ff1a3d] text-white font-bold px-8 md:px-12 py-4 md:py-5 text-base md:text-lg transition-all duration-300 overflow-hidden"
+              href="/register"
+              className="group relative w-full sm:w-auto bg-[#EB0028] hover:bg-[#ff1a3d] text-white font-bold px-8 md:px-12 py-4 md:py-5 text-base md:text-lg transition-all duration-300 overflow-hidden cursor-pointer"
               aria-label="Register for TEDxIIMT UNIVERSITY event"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
@@ -227,7 +243,7 @@ const Hero = () => {
 
             <a
               href="/speakers"
-              className="group w-full sm:w-auto bg-transparent border-2 border-white hover:border-[#EB0028] hover:bg-[#EB0028]/10 text-white font-bold px-8 md:px-12 py-4 md:py-5 text-base md:text-lg transition-all duration-300"
+              className="group w-full sm:w-auto bg-transparent border-2 border-white hover:border-[#EB0028] hover:bg-[#EB0028]/10 text-white font-bold px-8 md:px-12 py-4 md:py-5 text-base md:text-lg transition-all duration-300 cursor-pointer"
               aria-label="View TEDxIIMT UNIVERSITY speakers"
             >
               <span className="flex items-center justify-center gap-2">
@@ -237,23 +253,23 @@ const Hero = () => {
                 </svg>
               </span>
             </a>
-          </motion.div>
+          </motion.div> */}
 
-          {/* Social Proof - Trust Signals */}
+          {/* Social Proof - Trust Signals
           <motion.div
             variants={fadeInVariants}
             className="flex flex-wrap justify-center items-center gap-4 md:gap-8 text-sm text-gray-400"
           >
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-[#EB0028]" aria-hidden="true"></div>
-              <span className="font-semibold text-white">500+</span>
-              <span>Attendees</span>
+              <span className="font-semibold text-white">{editionData.attendee_capacity}+</span>
+              <span>Delegates</span>
             </div>
             <div className="hidden sm:block w-px h-4 bg-gray-700" aria-hidden="true"></div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-[#EB0028]" aria-hidden="true"></div>
-              <span className="font-semibold text-white">12+</span>
-              <span>Speakers</span>
+              <span className="font-semibold text-white">{editionData.speaker_count}+</span>
+              <span>Visionary Speakers</span>
             </div>
             <div className="hidden sm:block w-px h-4 bg-gray-700" aria-hidden="true"></div>
             <div className="flex items-center gap-2">
@@ -261,33 +277,11 @@ const Hero = () => {
               <span className="font-semibold text-white">6 Hours</span>
               <span>of Inspiration</span>
             </div>
-          </motion.div>
+          </motion.div> */}
         </motion.div>
 
-        {/* Scroll Indicator */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ 
-            opacity: [0.4, 1, 0.4],
-            y: [0, 8, 0]
-          }}
-          transition={{ 
-            duration: 2,
-            repeat: Infinity,
-            ease: 'easeInOut'
-          }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          aria-hidden="true"
-        >
-          <div className="w-6 h-10 border-2 border-white/30 flex items-start justify-center p-2">
-            <div className="w-1 h-2 bg-white/50"></div>
-          </div>
-        </motion.div>
+      
       </div>
-
-      {/* Performance optimization: Preload critical resources */}
-      <link rel="preload" as="image" href="/hero-background.jpg" />
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
     </section>
   );
 };

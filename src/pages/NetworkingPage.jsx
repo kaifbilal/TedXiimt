@@ -6,8 +6,6 @@ import Footer from '../components/Footer';
 const NetworkingPage = () => {
   return (
     <div className="min-h-screen bg-black text-white">
-      <Header />
-      
       <main id="main-content" className="pt-24 md:pt-28 lg:pt-32">
         {/* Hero Section */}
         <section className="relative overflow-hidden">
@@ -503,8 +501,6 @@ const NetworkingPage = () => {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 };

@@ -1,421 +1,319 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import logo from './logo-white.png'; // Make sure this is correct path
+import { 
+  Home as HomeIcon, Info, Users, MapPin, Sparkles,
+  Accessibility as AccessibilityIcon, HelpCircle, Mic, Calendar,
+  Compass, Handshake, Camera, Globe,
+  Ticket, ChevronDown, Menu, X, Library, User, LogOut, LayoutDashboard, Scale
+} from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useEdition } from '../context/EditionContext';
+import logo from './logo-white.png';
 
 const Header = () => {
+  const { user, isAuthenticated, logout } = useAuth();
+  const { activeEdition } = useEdition();
+  const isAdmin = typeof user?.role === 'string' && user.role.toLowerCase() === 'admin';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isJoinUsOpen, setIsJoinUsOpen] = useState(false);
-  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
-  const [activeSubmenu, setActiveSubmenu] = useState(null);
+  const [activeDropdown, setActiveDropdown] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
-  const megaMenuRef = useRef(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const navRef = useRef(null);
 
-  // Enhanced navigation structure
-  const navigationItems = [
-    {
-      label: 'Home',
-      href: '/',
-    },
-    // Event Menu - commented out for now
-    // {
-    //   label: 'Event',
-    //   href: '#',
-
-    //   megaMenu: {
-    //     sections: [
-    //       {
-    //         title: 'Event Information',
-    //         items: [
-    //           { label: 'About TEDxIIMT UNIVERSITY', href: '/about', desc: 'Learn about our mission and vision' },
-    //           { label: 'Organizing Team', href: '/team', desc: 'Meet the team behind TEDxIIMT UNIVERSITY' },
-    //           { label: 'Schedule', href: '/schedule', desc: 'Full day timeline and agenda' },
-    //           { label: 'Venue', href: '/venue', desc: 'Location and directions' },
-    //           { label: 'FAQ', href: '/faq',
-    //              desc: 'Frequently asked questions' }
-    //         ]
-    //       },
-    //       {
-    //         title: 'Experience',
-    //         items: [
-    //           { label: 'What to Expect', href: '/what-to-expect', desc: 'Complete event experience guide' },
-    //           { label: 'Networking', href: '/networking', desc: 'Connect with innovators and changemakers' },
-    //           { label: 'Gallery', href: '/gallery', desc: 'Event photos and videos' },
-    //           { label: 'Live Streaming', href: '/live', desc: 'Watch talks online' },
-    //           { label: 'Accessibility', href: '/accessibility', desc: 'Inclusive event features' }
-    //         ]
-    //       }
-    //     ]
-    //   }
-    // },
-    {
-      label: 'Stories',
-      href: '/blog',
-     
-    },
-    {
-      label: 'Speakers',
-      href: '/speakers',
-    
-    },
-    {
-      label: 'Team',
-      href: '/team',
-    },
-    // {
-    //   label: 'Gallery',
-    //   href: '/gallery',
-    
-    // },
-    // PARTNERS MENU - commented out for now
-    // {
-    //   label: 'Partners',
-    //   href: '#',
-    //   submenu: [
-    //     { label: 'Sponsors', href: '/sponsors' },
-    //     { label: 'Media Partners', href: '/media-partners' },
-    //     { label: 'Community Partners', href: '/community-partners' }
-    //   ]
-    // }
-  ];
-
-  // Scroll detection for header styling
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setIsScrolled(window.scrollY > 20);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close menus when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (megaMenuRef.current && !megaMenuRef.current.contains(event.target)) {
-        setIsMegaMenuOpen(false);
-        setActiveSubmenu(null);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-    setIsJoinUsOpen(false);
-    setIsMegaMenuOpen(false);
-    setActiveSubmenu(null);
-  };
-
-  const toggleJoinUs = () => {
-    setIsJoinUsOpen(!isJoinUsOpen);
-  };
-
-  const handleNavItemHover = (item) => {
-    if (item.megaMenu) {
-      setIsMegaMenuOpen(true);
-      setActiveSubmenu(item.label);
-    } else if (item.submenu) {
-      setActiveSubmenu(item.label);
-    } else {
-      setIsMegaMenuOpen(false);
-      setActiveSubmenu(null);
+  const getPortalPath = () => {
+    if (!user) return '/login';
+    switch (user.role) {
+      case 'admin': return '/portal/admin';
+      case 'lead': return '/portal/lead';
+      case 'volunteer': return '/portal/volunteer';
+      case 'speaker': return '/portal/speaker';
+      case 'attendee': return '/portal/attendee';
+      default: return '/portal/attendee';
     }
   };
+
+  const navigationItems = [
+    { label: 'Home', href: '/' },
+    {
+      label: 'About',
+      href: '/about',
+      submenu: [
+        { label: 'About TEDx', href: '/about', desc: 'Our mission & TED philosophy', Icon: Info },
+        { label: 'Organizing Team', href: '/team', desc: 'Meet the curators and team', Icon: Users },
+        { label: 'Venue & Directions', href: '/venue', desc: 'Seminar Hall, IIMT Meerut', Icon: MapPin },
+        { label: 'What to Expect', href: '/what-to-expect', desc: 'Attendee guide & experience', Icon: Sparkles },
+        { label: 'Accessibility', href: '/accessibility', desc: 'Inclusive accommodations', Icon: AccessibilityIcon },
+        { label: 'Code of Conduct', href: '/code-of-conduct', desc: 'Community safety & event rules', Icon: Scale },
+        { label: 'FAQ', href: '/faq', desc: 'Frequently asked questions', Icon: HelpCircle },
+      ]
+    },
+    {
+      label: 'Event',
+      href: '/schedule',
+      submenu: [
+        { label: 'Speakers', href: '/speakers', desc: 'Featured thinkers & innovators', Icon: Mic },
+        ...(isAdmin ? [{ label: 'Schedule / ROS', href: '/schedule', desc: 'Admin agenda & Backstage cues', Icon: Calendar }] : []),
+        { label: 'Interactive Activities', href: '/activities', desc: 'Workshops & ideation zones', Icon: Compass },
+        { label: 'Sponsors & Partners', href: '/partners', desc: 'Supporters & university partners', Icon: Handshake },
+      ]
+    },
+    {
+      label: 'Archive Library',
+      href: '/library',
+      // badge: 'All Years'
+    },
+    { label: 'Team', href: '/team' },
+    {
+      label: 'Media',
+      href: '/gallery',
+      submenu: [
+        { label: 'Photo Gallery', href: '/gallery', desc: 'High-res event moments', Icon: Camera },
+      ]
+    },
+    { label: 'Contact', href: '/contact' },
+  ];
+
   return (
-    <motion.header 
-      className={`w-full px-6 py-4 flex justify-between items-center text-white shadow-md relative z-50 h-20 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-black/95 backdrop-blur-md border-b border-gray-800/50' 
-          : 'bg-black'
-      }`}
-      initial={false}
-      animate={{
-        backgroundColor: isScrolled ? 'rgba(0, 0, 0, 0.95)' : 'rgba(0, 0, 0, 1)'
-      }}
-      transition={{ duration: 0.3 }}
-    >
-      {/* Logo on Left */}
-      <motion.div 
-        className="flex items-center"
-        whileHover={{ scale: 1.05 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      >
-        <a href="/" className="flex items-center">
-          <img src={logo || "/placeholder.svg"} alt="TEDxIIMT UNIVERSITY Logo" className="h-16" />
+    <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+      isScrolled ? 'bg-black/90 backdrop-blur-xl border-b border-zinc-800 shadow-2xl py-3' : 'bg-transparent py-5'
+    }`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        
+        {/* Logo Lockup */}
+        <a href="/" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-[#EB0028] rounded-lg p-1">
+          <img src={logo} alt="TEDxIIMT University Logo" className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105" />
+          <span className="sr-only">TEDxIIMT University - Home</span>
         </a>
-      </motion.div>
 
-      {/* Hamburger Menu Button (visible on small screens) */}
-      <button 
-        className="md:hidden flex flex-col justify-center items-center w-8 h-8"
-        onClick={toggleMenu}
-        aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-      >
-        <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
-        <span className={`block w-6 h-0.5 bg-white my-1 transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
-        <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
-      </button>
-
-      {/* Enhanced Desktop Navigation */}
-      <nav 
-        className="hidden lg:flex items-center space-x-8 text-sm font-medium"
-        ref={megaMenuRef}
-      >
-        {navigationItems.map((item) => (
-          <div
-            key={item.label}
-            className="relative"
-            onMouseEnter={() => handleNavItemHover(item)}
-            onMouseLeave={() => {
-              if (!item.megaMenu && !item.submenu) {
-                setActiveSubmenu(null);
-                setIsMegaMenuOpen(false);
-              }
-            }}
-          >
-            <motion.a
-              href={item.href}
-              className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors py-2 px-3 rounded-lg hover:bg-gray-800/50"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+        {/* Desktop Nav Items */}
+        <nav className="hidden lg:flex items-center gap-1" ref={navRef}>
+          {navigationItems.map((item, idx) => (
+            <div
+              key={idx}
+              className="relative"
+              onMouseEnter={() => item.submenu && setActiveDropdown(idx)}
+              onMouseLeave={() => setActiveDropdown(null)}
             >
-              <span className="text-sm">{item.icon}</span>
-              <span>{item.label}</span>
-              {(item.megaMenu || item.submenu) && (
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              )}
-            </motion.a>
-
-            {/* Regular Submenu */}
-            {item.submenu && activeSubmenu === item.label && (
-              <motion.div
-                className="absolute top-full left-0 mt-2 w-64 bg-gray-900/95 backdrop-blur-md border border-gray-700 rounded-xl shadow-2xl overflow-hidden"
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
+              <a
+                href={item.href}
+                className={`flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors rounded-md ${
+                  activeDropdown === idx ? 'text-[#EB0028] bg-zinc-900/60' : 'text-zinc-300 hover:text-white hover:bg-zinc-900/40'
+                }`}
               >
-                {item.submenu.map((subItem) => (
-                  <motion.a
-                    key={subItem.label}
-                    href={subItem.href}
-                    className="flex items-center space-x-3 px-4 py-3 hover:bg-red-500/10 hover:text-red-400 transition-colors border-b border-gray-800 last:border-b-0"
-                    whileHover={{ x: 4 }}
-                  >
-                    <span>{subItem.icon}</span>
-                    <span>{subItem.label}</span>
-                  </motion.a>
-                ))}
-              </motion.div>
-            )}
-          </div>
-        ))}
+                {item.label}
+                {item.badge && (
+                  <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 bg-[#EB0028]/20 text-[#EB0028] border border-[#EB0028]/30 rounded">
+                    {item.badge}
+                  </span>
+                )}
+                {item.submenu && <ChevronDown className="w-3.5 h-3.5 opacity-60" />}
+              </a>
 
-        {/* Join Us CTA */}
-        <div className="relative">
-          <motion.button
-            onClick={toggleJoinUs}
-            className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center space-x-2"
-            whileHover={{ scale: 1.05, y: -1 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <span>Join Us</span>
-            <svg className={`w-4 h-4 transition-transform ${isJoinUsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </motion.button>
-          
-          <AnimatePresence>
-            {isJoinUsOpen && (
-              <motion.div
-                className="absolute top-full right-0 mt-2 w-56 bg-gray-900/95 backdrop-blur-md border border-gray-700 rounded-xl shadow-2xl overflow-hidden"
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="p-2">
-                  <motion.a
-                    href="/join-us/speaker"
-                    className="flex items-center space-x-3 px-4 py-3 hover:bg-red-500/10 hover:text-red-400 transition-colors rounded-lg mb-1"
-                    whileHover={{ x: 4 }}
+              {/* Submenu Dropdown */}
+              <AnimatePresence>
+                {item.submenu && activeDropdown === idx && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full left-0 w-72 mt-1 py-2 bg-zinc-950/95 border border-zinc-800 rounded-xl shadow-2xl backdrop-blur-2xl z-50"
                   >
-                    <div>
-                      <div className="font-medium">Speaker</div>
-                      <div className="text-xs text-gray-500">Share your ideas</div>
-                    </div>
-                  </motion.a>
-                  <motion.a
-                    href="/join-us/sponsor"
-                    className="flex items-center space-x-3 px-4 py-3 hover:bg-red-500/10 hover:text-red-400 transition-colors rounded-lg mb-1"
-                    whileHover={{ x: 4 }}
-                  >
-                    
-                    <div>
-                      <div className="font-medium">Sponsor</div>
-                      <div className="text-xs text-gray-500">Partner with us</div>
-                    </div>
-                  </motion.a>
-                  <motion.a
-                    href="https://forms.gle/uwZAyzv84SB1WMo37"
-                    className="flex items-center space-x-3 px-4 py-3 hover:bg-red-500/10 hover:text-red-400 transition-colors rounded-lg"
-                    whileHover={{ x: 4 }}
-                  >
-              
-                    <div>
-                      <div className="font-medium">Attendee</div>
-                      <div className="text-xs text-gray-500">Get your tickets</div>
-                    </div>
-                  </motion.a>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </nav>
-
-      {/* Mega Menu */}
-      <AnimatePresence>
-        {isMegaMenuOpen && (
-          <motion.div
-            className="absolute top-full left-0 right-0 bg-gray-900/98 backdrop-blur-md border-b border-gray-800 shadow-2xl"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            onMouseEnter={() => setIsMegaMenuOpen(true)}
-            onMouseLeave={() => {
-              setIsMegaMenuOpen(false);
-              setActiveSubmenu(null);
-            }}
-          >
-            <div className="container mx-auto px-6 py-8">
-              {navigationItems
-                .find(item => item.label === activeSubmenu && item.megaMenu)
-                ?.megaMenu?.sections.map((section, index) => (
-                <div key={section.title} className="mb-8 last:mb-0">
-                  <h3 className="text-white font-semibold mb-4 text-lg">
-                    {section.title}
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {section.items.map((item) => (
-                      <motion.a
-                        key={item.label}
-                        href={item.href}
-                        className="group block p-4 bg-gray-800/50 rounded-xl hover:bg-red-500/10 border border-gray-700/50 hover:border-red-500/30 transition-all duration-200"
-                        whileHover={{ y: -2, scale: 1.02 }}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <div className="flex items-start space-x-3">
-                          <span className="text-2xl">{item.icon}</span>
-                          <div>
-                            <h4 className="text-white font-medium group-hover:text-red-400 transition-colors">
-                              {item.label}
-                            </h4>
-                            <p className="text-sm text-gray-400 mt-1 group-hover:text-gray-300 transition-colors">
-                              {item.desc}
-                            </p>
+                    {item.submenu.map((sub, sIdx) => {
+                      const SubIcon = sub.Icon;
+                      return (
+                        <a
+                          key={sIdx}
+                          href={sub.href}
+                          className="flex items-start gap-3 px-4 py-2.5 hover:bg-zinc-900/80 transition-colors group"
+                        >
+                          <div className="p-2 bg-zinc-900 rounded-lg text-zinc-400 group-hover:text-[#EB0028] group-hover:bg-[#EB0028]/10 transition-colors">
+                            <SubIcon className="w-4 h-4" />
                           </div>
-                        </div>
-                      </motion.a>
-                    ))}
-                  </div>
+                          <div>
+                            <div className="text-sm font-medium text-zinc-200 group-hover:text-white">{sub.label}</div>
+                            <div className="text-xs text-zinc-500 line-clamp-1">{sub.desc}</div>
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </nav>
+
+        {/* Right Action Area */}
+        <div className="hidden lg:flex items-center gap-3">
+          {isAuthenticated ? (
+            <div className="relative">
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-2.5 px-3.5 py-1.5 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 rounded-full transition-all text-sm font-medium text-white"
+              >
+                <div className="w-6 h-6 rounded-full bg-[#EB0028] text-white flex items-center justify-center text-xs font-bold uppercase">
+                  {user.name?.charAt(0) || 'U'}
+                </div>
+                <span className="max-w-[120px] truncate">{user.name}</span>
+                <span className="text-[10px] uppercase px-1.5 py-0.5 bg-zinc-800 text-zinc-300 rounded font-semibold">
+                  {user.role}
+                </span>
+                <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+              </button>
+
+              <AnimatePresence>
+                {userMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    className="absolute right-0 top-full mt-2 w-56 bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl py-2 z-50"
+                  >
+                    <div className="px-4 py-2 border-b border-zinc-800 text-xs text-zinc-400">
+                      Signed in as <span className="font-semibold text-white truncate block">{user.email}</span>
+                    </div>
+                    <a
+                      href={getPortalPath()}
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-zinc-200 hover:text-white hover:bg-zinc-900 transition-colors"
+                    >
+                      <LayoutDashboard className="w-4 h-4 text-[#EB0028]" />
+                      My {user.role.charAt(0).toUpperCase() + user.role.slice(1)} Portal
+                    </a>
+                    <button
+                      onClick={() => { logout(); setUserMenuOpen(false); }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-950/30 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <>
+              <a
+                href="/login"
+                className="px-3.5 py-2 text-sm font-medium text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-lg transition-colors"
+              >
+                Sign In
+              </a>
+              <a
+                href="/register"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#EB0028] hover:bg-[#c90022] rounded-lg shadow-lg shadow-[#EB0028]/25 transition-all hover:scale-105 active:scale-95"
+              >
+                <Ticket className="w-4 h-4" />
+                Get Tickets
+              </a>
+            </>
+          )}
+        </div>
+
+        {/* Mobile Menu Toggle */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <a
+            href="/register"
+            className="px-3 py-1.5 text-xs font-bold text-white bg-[#EB0028] rounded-md shadow"
+          >
+            Tickets
+          </a>
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-lg focus:outline-none"
+            aria-label="Toggle navigation menu"
+          >
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Drawer Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="lg:hidden bg-zinc-950/98 border-b border-zinc-800 overflow-hidden"
+          >
+            <div className="px-4 py-6 space-y-4 max-h-[80vh] overflow-y-auto">
+              {navigationItems.map((item, idx) => (
+                <div key={idx} className="border-b border-zinc-900 pb-2">
+                  <a
+                    href={item.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block text-base font-semibold text-zinc-200 hover:text-[#EB0028]"
+                  >
+                    {item.label}
+                  </a>
+                  {item.submenu && (
+                    <div className="pl-4 mt-2 space-y-2">
+                      {item.submenu.map((sub, sIdx) => (
+                        <a
+                          key={sIdx}
+                          href={sub.href}
+                          onClick={() => setIsMenuOpen(false)}
+                          className="block text-sm text-zinc-400 hover:text-white"
+                        >
+                          {sub.label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
+
+              <div className="pt-4 space-y-2">
+                {isAuthenticated ? (
+                  <>
+                    <a
+                      href={getPortalPath()}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="block w-full py-2.5 text-center text-sm font-semibold bg-zinc-900 border border-zinc-700 text-white rounded-lg"
+                    >
+                      Open {user.role.toUpperCase()} Portal
+                    </a>
+                    <button
+                      onClick={() => { logout(); setIsMenuOpen(false); }}
+                      className="block w-full py-2 text-center text-sm font-medium text-red-400 bg-red-950/20 rounded-lg"
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <a
+                      href="/login"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="block w-full py-2.5 text-center text-sm font-semibold bg-zinc-900 border border-zinc-700 text-white rounded-lg"
+                    >
+                      Sign In
+                    </a>
+                    <a
+                      href="/register"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="block w-full py-2.5 text-center text-sm font-semibold bg-[#EB0028] text-white rounded-lg shadow-md"
+                    >
+                      Get Tickets
+                    </a>
+                  </>
+                )}
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Mobile Menu (visible when hamburger is clicked) */}
-      {isMenuOpen && (
-        <div className="absolute top-full left-0 right-0 bg-black border-t border-gray-800 shadow-lg md:hidden">
-          <div className="flex flex-col p-4">
-            <a 
-              href="/" 
-              className="py-3 hover:text-red-500 transition border-b border-gray-800"
-              onClick={closeMenu}
-            >
-              Home
-            </a>
-            <a 
-              href="/blog" 
-              className="py-3 hover:text-red-500 transition border-b border-gray-800"
-              onClick={closeMenu}
-            >
-              Stories
-            </a>
-            {/* MYSTERY */}
-            {/* <a 
-              href="/mystery" 
-              className="py-3 hover:text-red-500 transition border-b border-gray-800"
-              onClick={closeMenu}
-            >
-              Mystery
-            </a> */}
-            {/* SPONSORS */}
-            {/* <a 
-              href="/sponsors" 
-              className="py-3 hover:text-red-500 transition border-b border-gray-800"
-              onClick={closeMenu}
-            >
-              Sponsors
-            </a> */}
-            <a 
-              href="/speakers" 
-              className="py-3 hover:text-red-500 transition border-b border-gray-800"
-              onClick={closeMenu}
-            >
-              Speakers
-            </a>
-            <a 
-              href="/team" 
-              className="py-3 hover:text-red-500 transition border-b border-gray-800"
-              onClick={closeMenu}
-            >
-              Team
-            </a>
-            {/* Gallery */}
-            {/* <a 
-              href="/gallery" 
-              className="py-3 hover:text-red-500 transition border-b border-gray-800"
-              onClick={closeMenu}
-            >
-              Gallery
-            </a> */}
-            <div className="border-b border-gray-800">
-              <button
-                onClick={toggleJoinUs}
-                className="w-full text-left py-3 hover:text-red-500 transition flex items-center justify-between"
-              >
-                Join Us
-                <svg className={`w-4 h-4 transition-transform ${isJoinUsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {isJoinUsOpen && (
-                <div className="pl-4 pb-2">
-                  <a href="/join-us/speaker" className="block py-2 text-sm hover:text-red-500 transition" onClick={closeMenu}>Speaker</a>
-                  <a href="/join-us/sponsor" className="block py-2 text-sm hover:text-red-500 transition" onClick={closeMenu}>Sponsor</a>
-                  <a href="https://forms.gle/uwZAyzv84SB1WMo37" className="block py-2 text-sm hover:text-red-500 transition" onClick={closeMenu}>Attendee</a>
-                </div>
-              )}
-            </div>
-            
-          </div>
-        </div>
-      )}
-    </motion.header>
+    </header>
   );
 };
 

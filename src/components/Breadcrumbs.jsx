@@ -1,102 +1,109 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-const Breadcrumbs = () => {
+const Breadcrumbs = ({ currentPath: propPath }) => {
   const [breadcrumbs, setBreadcrumbs] = useState([]);
 
   useEffect(() => {
-    const path = window.location.pathname;
-    const pathSegments = path.split('/').filter(segment => segment);
+    const path = propPath || window.location.pathname;
+    const cleanPath = path.split('?')[0].split('#')[0];
+    const pathSegments = cleanPath.split('/').filter(segment => segment);
     
-    // Build breadcrumb array with proper names
+    // Don't show breadcrumbs on homepage
+    if (pathSegments.length === 0 || cleanPath === '/') {
+      setBreadcrumbs([]);
+      return;
+    }
+
     const breadcrumbItems = [
-      { label: 'Home', url: '/',  }
+      { label: 'Home', url: '/' }
     ];
 
     const pathMap = {
-      'blog': { label: 'Stories',  },
-      'mystery': { label: 'Mystery', },
-      'sponsors': { label: 'Sponsors', },
-      'speakers': { label: 'Speakers',  },
-      'join-us': { label: 'Join Us', },
-      'speaker': { label: 'Speaker Form',  },
-      'sponsor': { label: 'Sponsor Form',  },
-      'attendee': { label: 'Attendee Form',  },
-      'about': { label: 'About',  },
-      'contact': { label: 'Contact',  },
-      'schedule': { label: 'Schedule',  },
-      'venue': { label: 'Venue',  }
+      'about': { label: 'About' },
+      'about-us': { label: 'About' },
+      'team': { label: 'Team' },
+      'speakers': { label: 'Speakers' },
+      'blog': { label: 'Stories' },
+      'blogs': { label: 'Stories' },
+      'stories': { label: 'Stories' },
+      'schedule': { label: 'Schedule' },
+      'venue': { label: 'Venue' },
+      'faq': { label: 'FAQ' },
+      'faqs': { label: 'FAQ' },
+      'gallery': { label: 'Gallery' },
+      'mystery': { label: 'Mystery Speaker' },
+      'sponsors': { label: 'Sponsors' },
+      'media-partners': { label: 'Media Partners' },
+      'community-partners': { label: 'Community Partners' },
+      'live': { label: 'Live Stream' },
+      'live-stream': { label: 'Live Stream' },
+      'what-to-expect': { label: 'What to Expect' },
+      'networking': { label: 'Networking' },
+      'accessibility': { label: 'Accessibility' },
+      'join-us': { label: 'Join Us' },
+      'speaker': { label: 'Speaker Application' },
+      'speaker-form': { label: 'Speaker Application' },
+      'sponsor': { label: 'Sponsor Application' },
+      'sponsor-form': { label: 'Sponsor Application' },
+      'attendee': { label: 'Attendee Registration' },
+      'attendee-form': { label: 'Attendee Registration' },
+      'test': { label: 'Test Page' }
     };
 
-    let currentPath = '';
+    let accumPath = '';
     pathSegments.forEach((segment) => {
-      currentPath += `/${segment}`;
-      const segmentInfo = pathMap[segment];
+      accumPath += `/${segment}`;
+      const segmentInfo = pathMap[segment.toLowerCase()];
       
       if (segmentInfo) {
         breadcrumbItems.push({
           label: segmentInfo.label,
-          url: currentPath,
-          icon: segmentInfo.icon
+          url: accumPath
         });
       } else {
-        // Handle dynamic routes like blog posts
-        if (segment.match(/^[\w\-]+$/)) {
-          breadcrumbItems.push({
-            label: segment.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-            url: currentPath,
-          });
-        }
+        // Handle dynamic slug routes
+        breadcrumbItems.push({
+          label: segment.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          url: accumPath
+        });
       }
     });
 
     setBreadcrumbs(breadcrumbItems);
-  }, []);
+  }, [propPath]);
 
   if (breadcrumbs.length <= 1) return null;
 
   return (
-    <motion.nav
-      className="bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 px-4 sm:px-6 py-3"
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      aria-label="Breadcrumb navigation"
-      role="navigation"
-    >
+    <div className="fixed top-20 left-0 right-0 z-40 bg-black/90 backdrop-blur-md border-b border-gray-900/80 px-4 sm:px-6 py-2">
       <div className="container mx-auto">
-        <ol className="flex items-center space-x-2 text-sm">
+        <ol className="flex items-center space-x-1.5 text-xs sm:text-sm text-gray-400 overflow-x-auto whitespace-nowrap py-0.5">
           {breadcrumbs.map((crumb, index) => (
             <li key={crumb.url} className="flex items-center">
               {index > 0 && (
-                <svg className="w-4 h-4 text-gray-600 mx-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                <svg className="w-3.5 h-3.5 text-gray-600 mx-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
                 </svg>
               )}
               
               {index === breadcrumbs.length - 1 ? (
-                // Current page - not clickable
-                <span className="flex items-center space-x-2 text-red-400 font-medium">
-                  <span>{crumb.icon}</span>
-                  <span>{crumb.label}</span>
+                <span className="text-red-500 font-semibold truncate max-w-xs">
+                  {crumb.label}
                 </span>
               ) : (
-                // Clickable breadcrumb
-                <motion.a
+                <a
                   href={crumb.url}
-                  className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  className="hover:text-white transition-colors truncate"
                 >
-                  <span>{crumb.icon}</span>
-                  <span>{crumb.label}</span>
-                </motion.a>
+                  {crumb.label}
+                </a>
               )}
             </li>
           ))}
         </ol>
       </div>
-    </motion.nav>
+    </div>
   );
 };
 

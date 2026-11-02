@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ImageOff, Package, Zap } from 'lucide-react';
 
 // Intersection Observer Hook for Lazy Loading
 export const useIntersectionObserver = (options = {}) => {
@@ -100,7 +101,7 @@ export const OptimizedImage = ({
       {isError && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-800/70 text-white text-sm">
           <div className="text-center">
-            <div className="text-2xl mb-2">📷</div>
+            <ImageOff className="w-6 h-6 mx-auto mb-2 text-gray-400" />
             <div>Image not available</div>
           </div>
         </div>
@@ -260,7 +261,10 @@ export const BundleAnalyzer = () => {
 
   return (
     <div className="fixed bottom-4 left-4 bg-black/90 text-white p-3 rounded-lg text-xs font-mono z-50">
-      <div>📦 Bundle Info:</div>
+      <div className="flex items-center space-x-1.5 font-bold mb-1">
+        <Package className="w-3.5 h-3.5 text-blue-400" />
+        <span>Bundle Info:</span>
+      </div>
       <div>Scripts: {bundleInfo.scripts}</div>
       <div>Styles: {bundleInfo.styles}</div>
       <div>Total: {bundleInfo.totalResources}</div>
@@ -297,7 +301,10 @@ export const PerformanceInsights = () => {
 
   return (
     <div className="fixed top-4 right-4 bg-green-900/90 text-green-100 p-3 rounded-lg text-xs font-mono z-50 max-w-xs">
-      <div className="font-bold mb-2">⚡ Performance</div>
+      <div className="font-bold mb-2 flex items-center space-x-1.5">
+        <Zap className="w-3.5 h-3.5 text-yellow-400" />
+        <span>Performance</span>
+      </div>
       {metrics.loadTime > 0 && (
         <div>Load: {metrics.loadTime.toFixed(2)}ms</div>
       )}

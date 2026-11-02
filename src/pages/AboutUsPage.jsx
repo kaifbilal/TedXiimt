@@ -5,7 +5,6 @@ import Footer from '../components/Footer';
 export default function AboutUsPage() {
   return (
     <div className="min-h-dvh w-full overflow-x-hidden bg-gradient-to-br from-black via-[#1a1a1a] to-red-950 text-white">
-      <Header />
       <section className="py-20 h-[calc(100vh-68px)] flex flex-col justify-center px-6 max-w-6xl mx-auto">
         <div className="space-y-6">
           <div className="relative">
@@ -157,10 +156,6 @@ export default function AboutUsPage() {
           </div>
         </div>
       </section>
-      <Footer />
-      
     </div>
-    
-
   );
 }

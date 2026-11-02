@@ -1,7 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 const ValueProposition = () => {
+  const { isAuthenticated } = useAuth();
   const benefits = [
     {
       title: 'Expand Your Mind',
@@ -124,7 +126,7 @@ const ValueProposition = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
-          <div className="flex flex-wrap justify-center gap-8 md:gap-12 mb-12 text-center">
+          {/* <div className="flex flex-wrap justify-center gap-8 md:gap-12 mb-12 text-center">
             {[
               { number: '500+', label: 'Expected Attendees' },
               { number: '12+', label: 'Inspiring Speakers' },
@@ -147,16 +149,14 @@ const ValueProposition = () => {
                 </div>
               </motion.div>
             ))}
-          </div>
+          </div> */}
 
           <motion.div
             className="space-y-4"
             whileHover={{ scale: 1.02 }}
           >
             <a
-            // Google form link for seat reservation
-              href="https://forms.gle/u9uyz84gMPZZiSYe9" 
-              target="_blank"
+              href={isAuthenticated ? '/attendee-form' : '/register'}
               className="inline-block bg-[#EB0028] hover:bg-[#ff1a3d] text-white font-bold px-8 py-4 md:px-12 md:py-5 text-lg transition-all duration-300 min-w-[250px]"
               aria-label="Reserve your seat at TEDxIIMT UNIVERSITY"
             >

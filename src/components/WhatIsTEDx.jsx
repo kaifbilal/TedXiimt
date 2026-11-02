@@ -1,139 +1,155 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+
+const AnimatedArticle = motion.article;
+
+const cards = [
+  {
+    title: (
+      <>
+        What is <span className="text-red-500">TEDx</span>?
+      </>
+    ),
+    description:
+      'TEDx is a global initiative designed to bring the spirit of TED—Technology, Entertainment, Design—to local communities. Organized independently under a license from TED, these events spark meaningful conversations and inspire change.',
+    imageAlt: 'TEDx stage',
+    linkLabel: 'Discover TEDx',
+    link: '/about',
+    imageClassName: 'order-1',
+    contentClassName: 'order-2',
+  },
+  {
+    title: 'IIMT University',
+    description:
+      'IIMT University, Meerut is a vibrant centre of learning that brings together academic excellence, innovation, and a strong culture of community engagement.',
+    imageAlt: 'IIMT University campus',
+    linkLabel: 'Explore the Campus',
+    link: '/about',
+    imageClassName: 'order-1 md:order-2',
+    contentClassName: 'order-2 md:order-1',
+  },
+  {
+    title: (
+      <>
+        About <span className="text-red-500">TEDx</span>IIMT
+      </>
+    ),
+    description: (
+      <>
+        Dedicated to creating a TED-like experience at IIMT University. We
+        bring together bright minds to explore our theme:{' '}
+        <strong>"Education, Entertainment & Entrepreneurship"</strong>.
+      </>
+    ),
+    imageAlt: 'TEDxIIMT University event',
+    linkLabel: 'Our Mission',
+    link: '/about',
+    imageClassName: 'order-1 md:order-2',
+    contentClassName: 'order-2 md:order-1',
+    badge: 'Student-Led Initiative',
+  },
+];
+
+const cardBaseClassName =
+  'absolute inset-0 flex h-full w-full flex-col overflow-y-auto rounded-[1.5rem] border border-white/[0.12] bg-[radial-gradient(circle_at_85%_15%,rgba(220,38,38,0.12),transparent_32%),rgba(9,9,11,0.97)] p-5 shadow-[0_18px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-[border-color,box-shadow,background-color] duration-500 hover:border-red-500/80 hover:bg-[radial-gradient(circle_at_85%_15%,rgba(220,38,38,0.18),transparent_34%),rgba(9,9,11,0.98)] hover:shadow-[0_0_60px_rgba(220,38,38,0.24)] md:rounded-3xl md:overflow-visible md:p-12';
 
 const WhatIsTEDx = () => {
+  const sectionRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end end'],
+  });
+
+  const cardTransforms = [
+    {
+      y: useTransform(scrollYProgress, [0, 0.27, 0.37], ['0%', '0%', '-6%'], { clamp: true }),
+      opacity: useTransform(scrollYProgress, [0, 0.27, 0.37], [1, 1, 0], { clamp: true }),
+      scale: useTransform(scrollYProgress, [0, 0.37], [1, 0.96], { clamp: true }),
+      pointerEvents: useTransform(scrollYProgress, (v) => (v < 0.37 ? 'auto' : 'none')),
+    },
+    {
+      y: useTransform(
+        scrollYProgress,
+        [0, 0.25, 0.37, 0.60, 0.70],
+        ['110%', '110%', '0%', '0%', '-6%'],
+        { clamp: true },
+      ),
+      opacity: useTransform(
+        scrollYProgress,
+        [0, 0.25, 0.37, 0.60, 0.70],
+        [0, 0, 1, 1, 0],
+        { clamp: true },
+      ),
+      scale: useTransform(scrollYProgress, [0.25, 0.37, 0.70], [0.96, 1, 0.96], { clamp: true }),
+      pointerEvents: useTransform(scrollYProgress, (v) => (v >= 0.25 && v < 0.70 ? 'auto' : 'none')),
+    },
+    {
+      y: useTransform(scrollYProgress, [0, 0.58, 0.70, 1], ['110%', '110%', '0%', '0%'], { clamp: true }),
+      opacity: useTransform(scrollYProgress, [0, 0.58, 0.70, 1], [0, 0, 1, 1], { clamp: true }),
+      scale: useTransform(scrollYProgress, [0.58, 0.70, 1], [0.96, 1, 1], { clamp: true }),
+      pointerEvents: useTransform(scrollYProgress, (v) => (v >= 0.58 ? 'auto' : 'none')),
+    },
+  ];
+
   return (
-    <section className="py-16 md:py-24 lg:py-32 bg-black relative overflow-hidden">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <motion.div
-          className="text-center mb-12 md:mb-16"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="inline-block mb-4">
-            <div className="h-1 w-20 bg-[#EB0028] mb-6"></div>
-          </div>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">
-            What is <span className="text-[#EB0028]">TEDx</span>?
-          </h2>
-          <p className="text-lg md:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-            In the spirit of discovering and spreading ideas, TED has created a program called TEDx.
-          </p>
-        </motion.div>
-
-        <div className="max-w-6xl mx-auto">
-          {/* Official TEDx Description */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="bg-[#0a0a0a] border border-[#1a1a1a] p-8 md:p-12 mb-12"
-          >
-            <div className="space-y-6">
-              <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
-                TEDx is a program of local, self-organized events that bring people together to share 
-                a TED-like experience. Our event is called <span className="text-[#EB0028] font-semibold">TEDxIIMT UNIVERSITY</span>, 
-                where <span className="text-[#EB0028]">x</span> = independently organized TED event.
-              </p>
-              
-              <p className="text-base md:text-lg text-gray-400 leading-relaxed">
-                At our TEDxIIMT UNIVERSITY event, TED Talks video and live speakers will combine to spark deep 
-                discussion and connection in a small group. The TED Conference provides general guidance 
-                for the TEDx program, but individual TEDx events, including ours, are self-organized.
-              </p>
-              
-              <div className="pt-6">
-                <a 
-                  href="https://www.ted.com/about/programs-initiatives/tedx-program" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-[#EB0028] hover:text-[#ff1a3d] transition-colors duration-300 font-medium"
+    <section ref={sectionRef} className="relative h-[300vh] bg-black text-white">
+      <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden px-3 py-4 sm:px-5 md:px-8">
+        <div className="relative isolate h-[min(620px,calc(100vh-2rem))] w-full max-w-[1400px] md:h-[min(650px,calc(100vh-2rem))]">
+          {cards.map((card, index) => (
+            <AnimatedArticle
+              key={card.imageAlt}
+              className={cardBaseClassName}
+              style={{
+                y: cardTransforms[index].y,
+                opacity: cardTransforms[index].opacity,
+                scale: cardTransforms[index].scale,
+                pointerEvents: cardTransforms[index].pointerEvents,
+                zIndex: (index + 1) * 10,
+              }}
+            >
+              <div className="grid min-h-full grid-cols-1 content-center items-center gap-7 md:grid-cols-2 md:gap-12">
+                <div
+                  className={`group/image relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-900 shadow-2xl md:aspect-[3/2] ${card.imageClassName}`}
                 >
-                  Learn more about the TEDx program
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </a>
-              </div>
-            </div>
-          </motion.div>
+                  <img
+                    src="/ted-conference.webp"
+                    alt={card.imageAlt}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover/image:scale-105"
+                  />
+                  <div
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent"
+                    aria-hidden="true"
+                  />
+                </div>
 
-          {/* TEDx Global Impact */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            <div className="text-center mb-12">
-              <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                TEDx <span className="text-[#EB0028]">Worldwide</span>
-              </h3>
-            </div>
-            
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-              {[
-                { number: "3000+", label: "Events Annually" },
-                { number: "180+", label: "Countries" },
-                { number: "100M+", label: "Views Online" },
-                { number: "1B+", label: "People Reached" }
-              ].map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-                  className="bg-[#0a0a0a] border border-[#1a1a1a] p-6 md:p-8 text-center hover:border-[#EB0028]/50 transition-all duration-300"
+                <div
+                  className={`flex max-w-2xl flex-col justify-center space-y-4 p-1 md:space-y-6 md:p-6 ${card.contentClassName}`}
                 >
-                  <div className="text-3xl md:text-4xl font-bold text-[#EB0028] mb-3">{stat.number}</div>
-                  <div className="text-sm md:text-base text-gray-400">{stat.label}</div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Key Principles */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="mt-16 md:mt-20"
-          >
-            <div className="text-center mb-12">
-              <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                TEDx <span className="text-[#EB0028]">Principles</span>
-              </h3>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-              {[
-                { title: "Ideas First", desc: "Content matters most" },
-                { title: "Diverse Voices", desc: "Multiple perspectives" },
-                { title: "Local Focus", desc: "Community-driven topics" },
-                { title: "Connection", desc: "Building meaningful networks" }
-              ].map((principle, index) => (
-                <motion.div
-                  key={principle.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
-                  className="group bg-[#0a0a0a] border border-[#1a1a1a] p-6 md:p-8 hover:border-[#EB0028]/50 transition-all duration-300 relative overflow-hidden"
-                >
-                  <div className="absolute top-0 left-0 h-1 w-0 bg-[#EB0028] group-hover:w-full transition-all duration-500"></div>
-                  <div className="relative z-10">
-                    <h4 className="text-lg md:text-xl font-bold text-white mb-3">{principle.title}</h4>
-                    <p className="text-gray-400 text-sm md:text-base">{principle.desc}</p>
+                  {card.badge && (
+                    <div className="w-fit rounded-full border border-red-500/30 bg-red-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-red-400 md:text-sm">
+                      {card.badge}
+                    </div>
+                  )}
+                  <h2 className="max-w-xl text-3xl font-bold leading-[1.05] tracking-tight text-white sm:text-4xl md:text-5xl">
+                    {card.title}
+                  </h2>
+                  <p className="max-w-xl text-sm leading-7 text-zinc-300 md:text-lg md:leading-8">
+                    {card.description}
+                  </p>
+                  <div className={index === 1 ? 'md:self-end' : ''}>
+                    <a
+                      href={card.link}
+                      className="group relative inline-flex h-11 items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-full bg-white px-7 py-2.5 text-sm font-semibold text-black shadow-lg shadow-black/20 transition-all duration-300 after:absolute after:inset-0 after:-translate-x-full after:bg-gradient-to-r after:from-transparent after:via-white/70 after:to-transparent hover:-translate-y-0.5 hover:bg-red-600 hover:text-white hover:shadow-red-600/25 hover:after:animate-shimmer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+                    >
+                      {card.linkLabel}
+                      {index === 1 && <span>→</span>}
+                    </a>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
+                </div>
+              </div>
+            </AnimatedArticle>
+          ))}
         </div>
       </div>
     </section>

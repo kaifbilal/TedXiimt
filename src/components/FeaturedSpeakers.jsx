@@ -3,32 +3,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import speakersData from '../data/speakersData';
 
 const FeaturedSpeakers = () => {
+  const speakers = speakersData.map((speaker) => ({
+    id: speaker.id,
+    name: speaker.name,
+    title: speaker.designation || 'Featured Speaker',
+    company: 'TEDxIIMT University',
+    image: speaker.image || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80',
+    talk: speaker.topic || speaker.quote || 'Ideas Worth Spreading',
+    description: speaker.shortBio || 'Sharing revolutionary perspectives and pioneering insights at TEDxIIMT University 2025.',
+    credentials: [speaker.designation?.split(',')[0] || 'Visionary Leader', 'TEDx Speaker'],
+    expertise: ['Storytelling', 'Film', 'Social Impact'],
+  }));
   const [currentSpeaker, setCurrentSpeaker] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
 
-  // Transform ALL speakersData to match the component's expected format
-  const speakers = speakersData.map(speaker => ({
-    id: speaker.id,
-    name: speaker.name,
-    title: speaker.designation,
-    company: speaker.designation.includes('IIMT') ? 'IIMT UNIVERSITY' : 
-            speaker.designation.includes('IAS') ? 'Government of India' :
-            speaker.designation.includes('Olympian') ? 'Sports Authority of India' :
-            speaker.designation.includes('Founder') ? 'Tricky Man' :
-            speaker.designation.includes('World Record') ? 'Independent Artist' :
-            speaker.designation.includes('Comedian') ? 'Entertainment Industry' :
-            speaker.designation.includes('Actor') ? 'Film & Politics' :
-            'Featured Speaker',
-    image: speaker.image,
-    talk: speaker.quote,
-    description: speaker.shortBio,
-    credentials: [speaker.designation.split(',')[0], speaker.designation.split(',')[1] || 'Keynote Speaker', 'TEDxIIMT Speaker'],
-    expertise: speaker.designation.split('&').map(exp => exp.trim()).slice(0, 3)
-  }));
-
   useEffect(() => {
     let interval;
-    if (isAutoPlay) {
+    if (isAutoPlay && speakers.length > 1) {
       interval = setInterval(() => {
         setCurrentSpeaker((prev) => (prev + 1) % speakers.length);
       }, 6000);
@@ -37,19 +28,34 @@ const FeaturedSpeakers = () => {
   }, [isAutoPlay, speakers.length]);
 
   const nextSpeaker = () => {
-    setCurrentSpeaker((prev) => (prev + 1) % speakers.length);
-    setIsAutoPlay(false);
+    if (speakers.length > 0) {
+      setCurrentSpeaker((prev) => (prev + 1) % speakers.length);
+      setIsAutoPlay(false);
+    }
   };
 
   const prevSpeaker = () => {
-    setCurrentSpeaker((prev) => (prev - 1 + speakers.length) % speakers.length);
-    setIsAutoPlay(false);
+    if (speakers.length > 0) {
+      setCurrentSpeaker((prev) => (prev - 1 + speakers.length) % speakers.length);
+      setIsAutoPlay(false);
+    }
   };
 
   const goToSpeaker = (index) => {
     setCurrentSpeaker(index);
     setIsAutoPlay(false);
   };
+
+  if (speakers.length === 0) {
+    return (
+      <section className="py-16 md:py-24 bg-black text-center text-zinc-500">
+        <div className="w-8 h-8 border-2 border-[#EB0028] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-sm">Loading 2025 Speaker Lineup...</p>
+      </section>
+    );
+  }
+
+  const active = speakers[currentSpeaker] || speakers[0];
 
   return (
     <section className="py-16 md:py-24 lg:py-32 bg-black relative overflow-hidden">
@@ -90,11 +96,11 @@ const FeaturedSpeakers = () => {
                 <div className="relative aspect-square lg:aspect-auto">
                   <div className="absolute top-0 left-0 w-full h-0.5 bg-[#EB0028]"></div>
                   <img
-                    src={speakers[currentSpeaker].image}
-                    alt={speakers[currentSpeaker].name}
+                    src={active.image}
+                    alt={active.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.target.src = '/api/placeholder/600/600';
+                      e.target.src = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80';
                     }}
                   />
                 </div>
@@ -106,13 +112,13 @@ const FeaturedSpeakers = () => {
                         Speaker {currentSpeaker + 1} of {speakers.length}
                       </div>
                       <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3">
-                        {speakers[currentSpeaker].name}
+                        {active.name}
                       </h3>
                       <p className="text-lg md:text-xl text-gray-400 mb-2">
-                        {speakers[currentSpeaker].title}
+                        {active.title}
                       </p>
                       <p className="text-base text-gray-500">
-                        {speakers[currentSpeaker].company}
+                        {active.company}
                       </p>
                     </div>
 
@@ -123,10 +129,10 @@ const FeaturedSpeakers = () => {
                         Talk Topic
                       </h4>
                       <p className="text-xl md:text-2xl font-semibold text-white mb-4">
-                        {speakers[currentSpeaker].talk}
+                        {active.talk}
                       </p>
                       <p className="text-gray-300 leading-relaxed">
-                        {speakers[currentSpeaker].description}
+                        {active.description}
                       </p>
                     </div>
 
@@ -136,7 +142,7 @@ const FeaturedSpeakers = () => {
                           Credentials
                         </h4>
                         <div className="flex flex-wrap gap-2">
-                          {speakers[currentSpeaker].credentials.map((cred, idx) => (
+                          {active.credentials.map((cred, idx) => (
                             <span
                               key={idx}
                               className="bg-[#EB0028]/10 border border-[#EB0028]/30 text-[#EB0028] px-3 py-1 text-sm"
@@ -149,10 +155,10 @@ const FeaturedSpeakers = () => {
 
                       <div>
                         <h4 className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
-                          Expertise
+                          Focus Areas
                         </h4>
                         <div className="flex flex-wrap gap-2">
-                          {speakers[currentSpeaker].expertise.map((exp, idx) => (
+                          {active.expertise.map((exp, idx) => (
                             <span
                               key={idx}
                               className="bg-[#1a1a1a] border border-[#EB0028]/20 text-gray-300 px-3 py-1 text-sm"
@@ -172,7 +178,7 @@ const FeaturedSpeakers = () => {
               <div className="flex gap-2">
                 <button
                   onClick={prevSpeaker}
-                  className="w-12 h-12 border-2 border-[#1a1a1a] hover:border-[#EB0028] text-white transition-all duration-300 flex items-center justify-center"
+                  className="w-12 h-12 border-2 border-[#1a1a1a] hover:border-[#EB0028] text-white transition-all duration-300 flex items-center justify-center cursor-pointer"
                   aria-label="Previous speaker"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,7 +187,7 @@ const FeaturedSpeakers = () => {
                 </button>
                 <button
                   onClick={nextSpeaker}
-                  className="w-12 h-12 border-2 border-[#1a1a1a] hover:border-[#EB0028] text-white transition-all duration-300 flex items-center justify-center"
+                  className="w-12 h-12 border-2 border-[#1a1a1a] hover:border-[#EB0028] text-white transition-all duration-300 flex items-center justify-center cursor-pointer"
                   aria-label="Next speaker"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,7 +201,7 @@ const FeaturedSpeakers = () => {
                   <button
                     key={index}
                     onClick={() => goToSpeaker(index)}
-                    className={`h-2 transition-all duration-300 ${
+                    className={`h-2 transition-all duration-300 cursor-pointer ${
                       index === currentSpeaker
                         ? 'w-12 bg-[#EB0028]'
                         : 'w-2 bg-[#1a1a1a] hover:bg-[#EB0028]/50'
@@ -207,7 +213,7 @@ const FeaturedSpeakers = () => {
 
               <button
                 onClick={() => setIsAutoPlay(!isAutoPlay)}
-                className="w-12 h-12 border-2 border-[#1a1a1a] hover:border-[#EB0028] text-white transition-all duration-300 flex items-center justify-center"
+                className="w-12 h-12 border-2 border-[#1a1a1a] hover:border-[#EB0028] text-white transition-all duration-300 flex items-center justify-center cursor-pointer"
                 aria-label={isAutoPlay ? 'Pause autoplay' : 'Start autoplay'}
               >
                 {isAutoPlay ? (

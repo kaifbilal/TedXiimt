@@ -139,8 +139,6 @@ const AccessibilityPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <Header />
-      
       <main id="main-content" className="pt-24 md:pt-28 lg:pt-32">
         {/* Hero Section */}
         <section className="py-20 relative overflow-hidden">
@@ -388,21 +386,21 @@ const AccessibilityPage = () => {
                 <p className="text-gray-400 mb-4 uppercase tracking-wider text-sm font-bold">Additional Resources</p>
                 <div className="flex flex-wrap justify-center gap-6 text-sm">
                   <motion.a
-                    href="/accessibility-guide"
+                    href="/accessibility"
                     className="text-[#EB0028] hover:text-[#ff1a3d] transition-colors"
                     whileHover={{ scale: 1.1 }}
                   >
                     Accessibility Guide
                   </motion.a>
                   <motion.a
-                    href="/venue-map"
+                    href="/venue"
                     className="text-[#EB0028] hover:text-[#ff1a3d] transition-colors"
                     whileHover={{ scale: 1.1 }}
                   >
                     Accessible Venue Map
                   </motion.a>
                   <motion.a
-                    href="/transportation"
+                    href="/venue"
                     className="text-[#EB0028] hover:text-[#ff1a3d] transition-colors"
                     whileHover={{ scale: 1.1 }}
                   >
@@ -421,8 +419,6 @@ const AccessibilityPage = () => {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 };

@@ -1,53 +1,47 @@
 import React from 'react';
-import Header from '../components/Header';
 import Hero from '../components/Hero';
-import CountdownTimer from '../components/CountdownTimer';
-import ValueProposition from '../components/ValueProposition';
 import FeaturedSpeakers from '../components/FeaturedSpeakers';
-import EventHighlights from '../components/EventHighlights';
 import WhatIsTEDx from '../components/WhatIsTEDx';
-import Testimonials from '../components/Testimonials';
-import Blog from '../components/Blog';
+import ValueProposition from '../components/ValueProposition';
+import EventHighlights from '../components/EventHighlights';
+import SocialMedia from '../components/SocialMedia';
 import Partners from '../components/Partners';
-import NewsletterSignup from '../components/NewsletterSignup';
-import Footer from '../components/Footer';
+import Blog from '../components/Blog';
 import FloatingCTA from '../components/FloatingCTA';
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
-      
-      {/* Main Content */}
-      <main>
-        {/* 1. Hero Section - First Impression & Value Prop */}
+    <div className="min-h-screen bg-black text-white overflow-x-clip">
+      <main id="main-content">
+        {/* 1. Hero Section */}
         <Hero />
 
-        {/* 4. Featured Speakers - Social Proof & Authority */}
+        {/* 2. Featured Speakers */}
         <FeaturedSpeakers />
         
-        {/* 2. Countdown Timer - Creates Urgency (Von Restorff Effect) */}
-        <CountdownTimer />
-        
-        {/* 6. What is TEDx - Educational Context */}
+        {/* 3. What is TEDx */}
         <WhatIsTEDx />
 
-        {/* 3. Value Proposition - Why Attend (Miller's Rule - 4 key benefits) */}
+       
+        
+        {/* 5. Event Highlights */}
+        <EventHighlights />
+
+        {/* 6. Community & Social */}
+        <SocialMedia />
+
+         {/* 4. Value Proposition */}
         <ValueProposition />
-        
-        {/* 5. Event Highlights - Features & Benefits (Progressive Disclosure) */}
-        {/* <EventHighlights /> */}
 
-        {/* 7. Testimonials - Social Proof & Trust Building */}
-        {/* <Testimonials /> */}
-        
-        {/* 8. Blog Preview - Fresh Content & Engagement */}
-        {/* <Blog /> */}
+        {/* 6. Strategic Partners */}
+        <Partners />
 
-
-
+        {/* 7. Latest Editorial Stories */}
+        <Blog />
       </main>
 
-
+      {/* Floating CTA */}
+      <FloatingCTA />
     </div>
   );
 };

@@ -1,21 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { getRecentPosts } from '../data/blogData';
+import { BookOpen, ArrowRight, Clock } from 'lucide-react';
+import api from '../services/api';
 
 const Blog = () => {
-  const recentPosts = getRecentPosts(3);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchPosts = async () => {
+      try {
+        const data = await api.get('/api/blog/posts/featured/');
+        const list = Array.isArray(data) ? data : (data?.results || []);
+        if (isMounted && list.length > 0) {
+          setPosts(list.slice(0, 3));
+        }
+      } catch (err) {
+        console.warn('Featured blog fetch error:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchPosts();
+    return () => { isMounted = false; };
+  }, []);
 
   const formatDate = (dateString) => {
+    if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric'
     });
   };
 
+  if (loading || posts.length === 0) {
+    return null;
+  }
+
   return (
-    <section className="w-full px-6 py-16 bg-[#0f0f0f] text-white">
-      <div className="max-w-6xl mx-auto">
+    <section className="relative w-full overflow-hidden border-t border-white/10 bg-zinc-950 px-5 py-16 text-white sm:px-6 md:py-24">
+      <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full bg-[#EB0028]/10 blur-3xl" />
+      <div className="relative mx-auto max-w-7xl">
         
         {/* Section Header */}
         <motion.div
@@ -23,130 +51,73 @@ const Blog = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-12"
+          className="mb-10 text-center md:mb-14"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Latest <span className="text-red-500">Stories</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EB0028]/10 border border-[#EB0028]/30 text-[#EB0028] text-xs font-bold uppercase mb-4">
+            <BookOpen className="w-3.5 h-3.5" />
+            Editorial Stories
+          </div>
+          <h2 className="mb-3 text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
+            Latest <span className="text-[#EB0028]">Articles & Insights</span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
-            Stay updated with speaker announcements, inspiring TED Talks, behind-the-scenes content, 
-            and the latest news from our TEDxIIMT UNIVERSITY community.
+          <p className="mx-auto max-w-xl text-sm leading-6 text-zinc-400 sm:text-base">
+            Explore speaker spotlights, stagecraft stories, and deep dives into the 2025 theme "Break the Flow".
           </p>
         </motion.div>
 
         {/* Blog Posts Grid */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {recentPosts.map((post, index) => (
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {posts.map((post, index) => (
             <motion.article
               key={post.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.2, duration: 0.8 }}
-              className="bg-gradient-to-br from-red-500/10 to-transparent rounded-2xl border border-red-500/20 hover:border-red-500/40 transition-colors overflow-hidden group cursor-pointer"
+              transition={{ delay: index * 0.15, duration: 0.6 }}
+              className="group flex cursor-pointer flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035] shadow-[0_14px_40px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1 hover:border-[#EB0028]/60 hover:bg-white/[0.06]"
               onClick={() => window.location.href = `/blog/${post.slug}`}
             >
               {/* Post Image */}
-              <div className="h-48 bg-gradient-to-br from-red-500/30 to-gray-800 relative overflow-hidden">
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+              <div className="relative h-52 overflow-hidden bg-zinc-800 sm:h-56">
+                <img
+                  src={post.cover_image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=80'}
+                  alt={post.title}
+                  className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
                 <div className="absolute top-4 left-4">
-                  <span className="bg-red-600 text-white text-xs px-3 py-1 rounded-full font-medium">
-                    {post.category}
+                  <span className="rounded-full bg-[#EB0028] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow">
+                    {post.category_name || 'Editorial'}
                   </span>
                 </div>
-                <div className="absolute bottom-4 right-4 text-white/80 text-sm">
-                  {post.readTime}
+                <div className="absolute bottom-3 right-4 text-zinc-300 text-xs flex items-center gap-1 font-mono">
+                  <Clock className="w-3 h-3 text-[#EB0028]" />
+                  {post.read_time || '4 min read'}
                 </div>
               </div>
 
               {/* Post Content */}
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-3 text-sm text-gray-400">
-                  <span>{formatDate(post.publishDate)}</span>
-                  <span>•</span>
-                  <span>{post.author}</span>
+              <div className="flex flex-grow flex-col justify-between space-y-5 p-6">
+                <div>
+                  <div className="mb-3 text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+                    {formatDate(post.publish_date)} • By {post.author_name}
+                  </div>
+                  <h3 className="line-clamp-2 text-xl font-bold leading-tight text-white transition-colors group-hover:text-[#EB0028]">
+                    {post.title}
+                  </h3>
+                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-zinc-400">
+                    {post.excerpt}
+                  </p>
                 </div>
-                
-                <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-red-400 transition-colors line-clamp-2">
-                  {post.title}
-                </h3>
-                
-                <p className="text-gray-400 text-sm leading-relaxed line-clamp-3 mb-4">
-                  {post.excerpt}
-                </p>
 
-                {/* Tags */}
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.slice(0, 2).map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-xs text-red-400 bg-red-500/10 px-2 py-1 rounded-md"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                  {post.tags.length > 2 && (
-                    <span className="text-xs text-gray-500">
-                      +{post.tags.length - 2} more
-                    </span>
-                  )}
+                <div className="flex items-center gap-2 border-t border-white/10 pt-4 text-xs font-bold text-[#EB0028] transition-transform group-hover:translate-x-1">
+                  <span>Read Article</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </div>
               </div>
             </motion.article>
           ))}
         </div>
-
-        {/* Call to Action */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          className="text-center mt-12"
-        >
-          <a
-            href="/blog"
-            className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-medium transition-colors group"
-          >
-            View All Stories
-            <svg 
-              className="w-4 h-4 group-hover:translate-x-1 transition-transform" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </a>
-        </motion.div>
-
-        {/* Newsletter Signup */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.8, duration: 0.8 }}
-          className="mt-16 bg-gradient-to-r from-red-500/20 to-transparent rounded-2xl p-8 border border-red-500/30 text-center"
-        >
-          <h3 className="text-2xl font-semibold text-white mb-4">
-            Never Miss a Story
-          </h3>
-          <p className="text-gray-400 mb-6 max-w-2xl mx-auto">
-            Subscribe to our newsletter for the latest speaker announcements, event updates, 
-            and inspiring content delivered directly to your inbox.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 bg-black/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-red-500 transition-colors"
-            />
-            <button className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors whitespace-nowrap">
-              Subscribe
-            </button>
-          </div>
-        </motion.div>
-
       </div>
     </section>
   );

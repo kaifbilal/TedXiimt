@@ -6,8 +6,6 @@ import Footer from '../components/Footer';
 const VenuePage = () => {
   return (
     <div className="min-h-screen bg-black text-white">
-      <Header />
-      
       <main id="main-content" className="pt-24 md:pt-28 lg:pt-32">
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-[#EB0028]/5 to-transparent pointer-events-none"></div>
@@ -184,7 +182,7 @@ const VenuePage = () => {
                 {[
                   {
                     title: 'By Metro',
-                    description: 'Take the Meerut Metro to the nearest station and use local transport to reach the venue.',
+                    description: 'Take the Metro to the Begum Pull Metro station and use local transport to reach the IIMT University.',
                     details: ['Metro connectivity available', 'Local cabs and autos nearby', 'Approximately 10-15 minutes from station']
                   },
                   {
@@ -270,8 +268,6 @@ const VenuePage = () => {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 };
